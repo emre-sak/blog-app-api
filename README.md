@@ -1,5 +1,6 @@
 # blog-app-api
 **Technologies Used**
+
 Java 17
 
 Spring Boot 3
