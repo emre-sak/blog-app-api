@@ -1,4 +1,4 @@
-# blog-app-api
+# Blog Rest API
 **Technologies Used**
 
 Java 17
