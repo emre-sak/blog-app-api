@@ -1,6 +1,8 @@
 package com.springboot.blog.controller;
 
 import com.springboot.blog.dto.CommentDto;
+import com.springboot.blog.dto.requests.CreateCommentRequest;
+import com.springboot.blog.dto.requests.UpdateCommentRequest;
 import com.springboot.blog.service.CommnetService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -15,18 +17,18 @@ import java.util.List;
 @AllArgsConstructor
 public class CommentController {
 
-    private CommnetService commnetService;
+    private final CommnetService commnetService;
 
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentDto> createComment(@PathVariable("postId") Long postId,
-                                                    @RequestBody @Valid CommentDto commentDto) {
+                                                    @RequestBody @Valid CreateCommentRequest commentRequest) {
 
-        return new ResponseEntity<>(commnetService.createComment(postId, commentDto), HttpStatus.CREATED);
+        return new ResponseEntity<>(commnetService.createComment(postId, commentRequest), HttpStatus.CREATED);
     }
 
     @GetMapping("/posts/{postId}/comments")
-    public List<CommentDto> getCommentsByPostId(@PathVariable("postId") Long postId) {
-        return commnetService.getCommentsByPostId(postId);
+    public ResponseEntity<List<CommentDto>> getCommentsByPostId(@PathVariable("postId") Long postId) {
+        return ResponseEntity.ok(commnetService.getCommentsByPostId(postId));
     }
 
     @GetMapping("/posts/{postId}/comments/{commentId}")
@@ -41,9 +43,9 @@ public class CommentController {
     @PutMapping("/posts/{postId}/comments/{commentId}")
     public ResponseEntity<CommentDto> updateComment(@PathVariable("postId") Long postId,
                                                     @PathVariable("commentId") Long commentId,
-                                                    @RequestBody @Valid CommentDto commentDto) {
+                                                    @RequestBody @Valid UpdateCommentRequest commentRequest) {
 
-        CommentDto updatedComment = commnetService.updateComment(postId, commentId, commentDto);
+        CommentDto updatedComment = commnetService.updateComment(postId, commentId, commentRequest);
 
         return ResponseEntity.ok(updatedComment);
     }

@@ -2,6 +2,8 @@ package com.springboot.blog.controller;
 
 import com.springboot.blog.dto.PostDto;
 import com.springboot.blog.dto.PostResponse;
+import com.springboot.blog.dto.requests.CreatePostRequest;
+import com.springboot.blog.dto.requests.UpdatePostRequest;
 import com.springboot.blog.service.PostService;
 import com.springboot.blog.utils.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +27,7 @@ import java.util.List;
 )
 public class PostController {
 
-    private PostService postService;
+    private final PostService postService;
 
     @Operation(
             summary = "Create Post REST API",
@@ -40,8 +42,8 @@ public class PostController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<PostDto> createPost(@RequestBody @Valid PostDto postDto) {
-        return new ResponseEntity<>(postService.createPost(postDto), HttpStatus.CREATED);
+    public ResponseEntity<PostDto> createPost(@RequestBody @Valid CreatePostRequest postRequest) {
+        return new ResponseEntity<>(postService.createPost(postRequest), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -88,8 +90,8 @@ public class PostController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("{id}")
-    public ResponseEntity<PostDto> updatePost(@RequestBody @Valid PostDto postDto, @PathVariable Long id) {
-        return ResponseEntity.ok(postService.updatePost(postDto, id));
+    public ResponseEntity<PostDto> updatePost(@RequestBody @Valid UpdatePostRequest postRequest, @PathVariable Long id) {
+        return ResponseEntity.ok(postService.updatePost(postRequest, id));
     }
 
     @Operation(

@@ -1,6 +1,8 @@
 package com.springboot.blog.controller;
 
 import com.springboot.blog.dto.CategoryDto;
+import com.springboot.blog.dto.requests.CreateCategoryRequest;
+import com.springboot.blog.dto.requests.UpdateCategoryRequest;
 import com.springboot.blog.service.CategoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,12 +17,12 @@ import java.util.List;
 @AllArgsConstructor
 public class CategoryController {
 
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CategoryDto> addCategory(@RequestBody CategoryDto categoryDto) {
-        CategoryDto savedCategory = categoryService.addCategory(categoryDto);
+    public ResponseEntity<CategoryDto> addCategory(@RequestBody CreateCategoryRequest categoryRequest) {
+        CategoryDto savedCategory = categoryService.addCategory(categoryRequest);
         return new ResponseEntity<>(savedCategory, HttpStatus.CREATED);
     }
 
@@ -38,8 +40,9 @@ public class CategoryController {
 
     @PutMapping("{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CategoryDto> updateCategory(@RequestBody CategoryDto categoryDto, @PathVariable Long id) {
-        CategoryDto updatedCategory = categoryService.updateCategory(categoryDto, id);
+    public ResponseEntity<CategoryDto> updateCategory(@RequestBody UpdateCategoryRequest categoryRequest,
+                                                      @PathVariable Long id) {
+        CategoryDto updatedCategory = categoryService.updateCategory(categoryRequest, id);
         return ResponseEntity.ok(updatedCategory);
     }
 
@@ -49,6 +52,5 @@ public class CategoryController {
         categoryService.deleteCategory(id);
         return ResponseEntity.ok("Category deleted successfully!.");
     }
-
 
 }

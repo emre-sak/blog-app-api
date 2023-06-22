@@ -1,5 +1,7 @@
 package com.springboot.blog.service.impl;
 
+import com.springboot.blog.dto.requests.CreatePostRequest;
+import com.springboot.blog.dto.requests.UpdatePostRequest;
 import com.springboot.blog.entity.Category;
 import com.springboot.blog.entity.Post;
 import com.springboot.blog.exception.ResourceNotFoundException;
@@ -8,8 +10,8 @@ import com.springboot.blog.dto.PostResponse;
 import com.springboot.blog.repository.CategoryRepository;
 import com.springboot.blog.repository.PostRepository;
 import com.springboot.blog.service.PostService;
+import com.springboot.blog.utils.mappers.ModelMapperService;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,23 +24,23 @@ import java.util.List;
 @AllArgsConstructor
 public class PostServiceImpl implements PostService {
 
-    private PostRepository postRepository;
-    private CategoryRepository categoryRepository;
-    private ModelMapper modelMapper;
+    private final PostRepository postRepository;
+    private final CategoryRepository categoryRepository;
+    private final ModelMapperService modelMapper;
 
     @Override
-    public PostDto createPost(PostDto postDto) {
+    public PostDto createPost(CreatePostRequest postRequest) {
 
-        Category category = categoryRepository.findById(postDto.getCategoryId()).orElseThrow(
-                () -> new ResourceNotFoundException("Category", "id", postDto.getCategoryId())
+        Category category = categoryRepository.findById(postRequest.getCategoryId()).orElseThrow(
+                () -> new ResourceNotFoundException("Category", "id", postRequest.getCategoryId())
         );
 
-        Post post = modelMapper.map(postDto, Post.class);
+        Post post = modelMapper.forRequest().map(postRequest, Post.class);
         post.setCategory(category);
 
         Post newPost = postRepository.save(post);
 
-        PostDto postResponse = modelMapper.map(newPost, PostDto.class);
+        PostDto postResponse = modelMapper.forResponse().map(newPost, PostDto.class);
 
         return postResponse;
     }
@@ -55,10 +57,12 @@ public class PostServiceImpl implements PostService {
 
         List<Post> listOfPosts = posts.getContent();
 
-        List<PostDto> content =  listOfPosts.stream().map(c -> modelMapper.map(c, PostDto.class)).toList();
+        List<PostDto> contents =  listOfPosts
+                .stream()
+                .map(content -> modelMapper.forResponse().map(content, PostDto.class)).toList();
 
         PostResponse postResponse = new PostResponse();
-        postResponse.setContent(content);
+        postResponse.setContent(contents);
         postResponse.setPageNo(posts.getNumber());
         postResponse.setPageSize(posts.getSize());
         postResponse.setTotalElements(posts.getTotalElements());
@@ -66,30 +70,32 @@ public class PostServiceImpl implements PostService {
         postResponse.setLast(posts.isLast());
 
         return postResponse;
-
     }
 
     @Override
     public PostDto getPostById(Long id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-        return modelMapper.map(post, PostDto.class);
+        return modelMapper.forResponse().map(post, PostDto.class);
     }
 
     @Override
-    public PostDto updatePost(PostDto postDto, Long id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+    public PostDto updatePost(UpdatePostRequest postRequest, Long id) {
 
-        Category category = categoryRepository.findById(postDto.getCategoryId()).orElseThrow(
-                () -> new ResourceNotFoundException("Category", "id", postDto.getCategoryId())
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Post", "id", id));
+
+        Category category = categoryRepository.findById(postRequest.getCategoryId()).orElseThrow(
+                () -> new ResourceNotFoundException("Category", "id", postRequest.getCategoryId())
         );
 
-        post.setTitle(postDto.getTitle());
-        post.setDescription(postDto.getDescription());
-        post.setContent(postDto.getContent());
+        post.setTitle(postRequest.getTitle());
+        post.setDescription(postRequest.getDescription());
+        post.setContent(postRequest.getContent());
         post.setCategory(category);
 
         Post updatedPost = postRepository.save(post);
-        return modelMapper.map(updatedPost, PostDto.class);
+
+        return modelMapper.forResponse().map(updatedPost, PostDto.class);
     }
 
     @Override
@@ -107,7 +113,7 @@ public class PostServiceImpl implements PostService {
 
         List<Post> posts = postRepository.findByCategoryId(categoryId);
 
-        return posts.stream().map(post -> modelMapper.map(post, PostDto.class)).toList();
+        return posts.stream().map(post -> modelMapper.forResponse().map(post, PostDto.class)).toList();
     }
 
     @Override
@@ -115,7 +121,9 @@ public class PostServiceImpl implements PostService {
 
         List<Post> posts = postRepository.searchPosts(query);
 
-        List<PostDto> postDtos = posts.stream().map((post) -> modelMapper.map(post, PostDto.class)).toList();
+        List<PostDto> postDtos = posts
+                .stream()
+                .map((post) -> modelMapper.forResponse().map(post, PostDto.class)).toList();
 
         return postDtos;
     }
