@@ -13,7 +13,7 @@ Spring Data JPA
 
 Swagger - API Documentation
 
-MySQL
+PostgreSQL
 
 Maven
 
